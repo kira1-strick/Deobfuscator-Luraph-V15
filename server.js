@@ -8,13 +8,13 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Izinkan akses dari web mana aja (CORS)
 app.use(cors());
 
-// --- SETUP LUAU-AST (Paksa ngarah ke folder /app/bin) ---
+// Paksa luau-ast ngarah ke folder bin di dalam Docker
 process.env.LUAU_AST_BIN = '/app/bin/luau-ast';
-// --------------------------------------------------------
 
-// Setup penyimpanan Multer biar ekstensi file gak ilang
+// Setup penyimpanan Multer (biar ekstensi .lua gak ilang)
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         if (!fs.existsSync('uploads')) fs.mkdirSync('uploads');
@@ -26,9 +26,10 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
+// Bikin folder output kalau belum ada
 if (!fs.existsSync('output')) fs.mkdirSync('output');
 
-// Endpoint buat proses file
+// Endpoint utama buat nerima file dari web
 app.post('/api/deobfuscate', upload.single('luaFile'), (req, res) => {
     if (!req.file) return res.status(400).send('File tidak ditemukan');
 
@@ -36,9 +37,19 @@ app.post('/api/deobfuscate', upload.single('luaFile'), (req, res) => {
     const originalName = req.file.originalname;
     const outputPath = `output/deob_${Date.now()}_${originalName}`;
 
-    // Pakai --no-devirt biar ringan dan cepet di Railway
-    const command = `node deob.js "${inputPath}" --no-devirt -o "${outputPath}"`;
+    // Nangkep mode dari frontend (default: flash)
+    const mode = req.body.mode || 'flash';
+    
+    let command = '';
+    if (mode === 'normal') {
+        // MODE NORMAL: Full Devirtualize (Bongkar kode utuh, lama, butuh RAM)
+        command = `node deob.js "${inputPath}" --no-hooks -o "${outputPath}"`;
+    } else {
+        // MODE FLASH: Cuma rekam jejak (Cepet, ringan)
+        command = `node deob.js "${inputPath}" --no-devirt --no-hooks -o "${outputPath}"`;
+    }
 
+    // Jalanin perintah deob.js
     exec(command, { timeout: 300000 }, (error, stdout, stderr) => {
         // Hapus file input sementara
         if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
@@ -48,10 +59,10 @@ app.post('/api/deobfuscate', upload.single('luaFile'), (req, res) => {
             return res.status(500).send(`Gagal memproses: ${stderr || error.message}`);
         }
 
-        // Kirim file hasil download
-        res.download(outputPath, `deob_${originalName}`, (err) => {
+        // Kirim file hasil
+        res.download(outputPath, `deob_${mode}_${originalName}`, (err) => {
             if (err) console.error(err);
-            // Hapus file output setelah 10 detik
+            // Hapus file output setelah 10 detik biar server gak penuh
             setTimeout(() => { 
                 if(fs.existsSync(outputPath)) fs.unlinkSync(outputPath) 
             }, 10000);
@@ -59,6 +70,7 @@ app.post('/api/deobfuscate', upload.single('luaFile'), (req, res) => {
     });
 });
 
+// Nyalain server
 app.listen(port, () => {
     console.log(`Server jalan di port ${port}`);
 });
