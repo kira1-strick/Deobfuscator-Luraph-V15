@@ -27,13 +27,12 @@ RUN rm -rf bin/ && mkdir -p bin && \
     rm luau.zip && \
     chmod -R 777 /app/bin
 
-# 7. TRIK LARPCORRUPT: Rename binary biar dikira file Windows (.exe)
-# Larpcorrupt butuh file .exe, jadi kita bohongin dia pake binary Linux
+# 7. TRIK LARPCORRUPT: Copy binary Luau TANPA .exe
 RUN mkdir -p /app/larp/Deobfuscator/deobf/bin && \
-    cp /app/bin/luau /app/larp/Deobfuscator/deobf/bin/luau.exe || true && \
-    cp /app/bin/luau-ast /app/larp/Deobfuscator/deobf/bin/luau-ast.exe || true && \
-    cp /app/bin/luau-compile /app/larp/Deobfuscator/deobf/bin/luau-compile.exe || true && \
-    cp /app/bin/luau-analyze /app/larp/Deobfuscator/deobf/bin/luau-analyze.exe || true && \
+    cp /app/bin/luau /app/larp/Deobfuscator/deobf/bin/luau || true && \
+    cp /app/bin/luau-ast /app/larp/Deobfuscator/deobf/bin/luau-ast || true && \
+    cp /app/bin/luau-compile /app/larp/Deobfuscator/deobf/bin/luau-compile || true && \
+    cp /app/bin/luau-analyze /app/larp/Deobfuscator/deobf/bin/luau-analyze || true && \
     chmod -R 777 /app/larp/Deobfuscator/deobf/bin
 
 # 8. Jalanin server
