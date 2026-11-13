@@ -6,10 +6,14 @@ RUN apt-get update && apt-get install -y python3 python3-pip git curl unzip && r
 WORKDIR /app
 
 # --- AMBIL PROMETHEUS DARI GITHUB ---
-# Pastiin link ini bener (punya lo)
 RUN git clone https://github.com/kira1-strick/Prometheus-Deobfuscator.git prometheus
 RUN cd prometheus && npm install
 # ------------------------------------
+
+# --- AMBIL LARPCORRUPT DARI GITHUB ---
+RUN git clone https://github.com/larpcorrupt/luraph-v15-v14.x-deobfuscator.git larp
+RUN cd larp && pip3 install -r requirements.txt || true
+# -------------------------------------
 
 # Copy package.json web utama dan install
 COPY package*.json ./
