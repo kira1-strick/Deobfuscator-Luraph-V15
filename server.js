@@ -45,8 +45,9 @@ app.post('/api/deobfuscate', upload.single('luaFile'), (req, res) => {
         command = `node prometheus/bin/pdeobf.js "${inputPath}" -o "${outputPath}"`;
     } else if (engine === 'larp') {
         // PAKE LARPCORRUPT (Luraph v14.x Spesialis)
-        // Asumsi nama file utamanya cli.py atau main.py
-        command = `cd larp && python3 cli.py "../${inputPath}" -o "../${outputPath}"`;
+        // Path dibenerin sesuai dokumentasi: masuk ke Deobfuscator/deobf dulu
+        // Pake ../../../ buat balik ke folder /app tempat file upload & output
+        command = `cd larp/Deobfuscator/deobf && python3 cli.py "../../../${inputPath}" -o "../../../${outputPath}"`;
     } else {
         // PAKE CAOMOD (Luraph)
         if (mode === 'normal') {
@@ -62,7 +63,8 @@ app.post('/api/deobfuscate', upload.single('luaFile'), (req, res) => {
 
         if (error) {
             console.error(`Error: ${error.message}`);
-            return res.status(500).send(`Gagal memproses: ${stderr || error.message}`);
+            // Tampilin log stdout & stderr biar kita tau apa yang dilakuin Python
+            return res.status(500).send(`Gagal memproses: ${stderr || error.message}\n\nLog Output:\n${stdout}`);
         }
 
         // Kirim file hasil download
