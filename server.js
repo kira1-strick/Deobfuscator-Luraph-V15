@@ -34,7 +34,7 @@ app.post('/api/deobfuscate', upload.single('luaFile'), (req, res) => {
     const originalName = req.file.originalname;
     const outputPath = `output/deob_${Date.now()}_${originalName}`;
 
-    // Nangkep pilihan engine dari frontend (default: luraph)
+    // Nangkep pilihan engine dari frontend
     const engine = req.body.engine || 'luraph';
     const mode = req.body.mode || 'flash';
     
@@ -43,6 +43,10 @@ app.post('/api/deobfuscate', upload.single('luaFile'), (req, res) => {
     if (engine === 'wearedevs') {
         // PAKE PROMETHEUS (WeAreDevs)
         command = `node prometheus/bin/pdeobf.js "${inputPath}" -o "${outputPath}"`;
+    } else if (engine === 'larp') {
+        // PAKE LARPCORRUPT (Luraph v14.x Spesialis)
+        // Asumsi nama file utamanya cli.py atau main.py
+        command = `cd larp && python3 cli.py "../${inputPath}" -o "../${outputPath}"`;
     } else {
         // PAKE CAOMOD (Luraph)
         if (mode === 'normal') {
