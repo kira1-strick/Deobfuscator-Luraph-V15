@@ -39,13 +39,11 @@ app.post('/api/deobfuscate', upload.single('luaFile'), (req, res) => {
     if (engine === 'wearedevs') {
         command = `node prometheus/bin/pdeobf.js "${inputPath}" -o "${outputPath}"`;
     } else if (engine === 'larp_v15') {
-        // ENGINE V15: Panggil deob.py dengan plugin luraph_v15
-        command = `cd larp && python3 deobf/deob.py "../${inputPath}" -o "../${outputPath}" --obfuscator luraph_v15`;
+        command = `cd larp/Deobfuscator/deobf && python3 deob.py "../../../${inputPath}" -o "../../../${outputPath}" --obfuscator luraph_v15`;
     } else if (engine === 'larp') {
-        // ENGINE V14: Panggil cli.py dengan --engine 14.7
-        command = `cd larp/Deobfuscator/deobf && python3 cli.py "../../../${inputPath}" -o "../../../${outputPath}" --engine 14.7 --trace-fallback`;
+        // AUTO-DETECT: Hapus --engine biar cli.py nebak sendiri (14.7 atau 14.8)
+        command = `cd larp/Deobfuscator/deobf && python3 cli.py "../../../${inputPath}" -o "../../../${outputPath}" --trace-fallback`;
     } else {
-        // CAOMOD (LURAPH)
         if (mode === 'normal') {
             command = `node deob.js "${inputPath}" --no-hooks --timeout 1200 --budget 1200 -o "${outputPath}"`;
         } else {
