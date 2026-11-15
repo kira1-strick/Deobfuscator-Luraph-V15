@@ -15,7 +15,7 @@ RUN cd larp && pip3 install -r requirements.txt || true
 
 # 4. AMBIL MOONSEC (dari repo mokaEZF)
 RUN git clone https://github.com/mokaEZF/lua-deobfuscator-bot2.git moonsec
-RUN cd moonsec && npm install
+RUN cd moonsec && npm install --legacy-peer-deps
 
 # 5. Copy package.json web utama dan install dependensi Node.js (termasuk axios)
 COPY package*.json ./
