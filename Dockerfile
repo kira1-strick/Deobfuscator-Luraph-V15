@@ -13,21 +13,25 @@ RUN cd prometheus && npm install
 RUN git clone https://github.com/larpcorrupt/luraph-v15-v14.x-deobfuscator.git larp
 RUN cd larp && pip3 install -r requirements.txt || true
 
-# 4. Copy package.json web utama dan install dependensi Node.js
+# 4. AMBIL MOONSEC (dari repo mokaEZF)
+RUN git clone https://github.com/mokaEZF/lua-deobfuscator-bot2.git moonsec
+RUN cd moonsec && npm install
+
+# 5. Copy package.json web utama dan install dependensi Node.js (termasuk axios)
 COPY package*.json ./
 RUN npm install
 
-# 5. Copy semua file web utama lo
+# 6. Copy semua file web utama lo
 COPY . .
 
-# 6. SETUP BINARY LUAU (BUAT CAOMOD)
+# 7. SETUP BINARY LUAU (BUAT CAOMOD)
 RUN rm -rf bin/ && mkdir -p bin && \
     curl -L -o luau.zip https://github.com/luau-lang/luau/releases/latest/download/luau-ubuntu.zip && \
     unzip luau.zip -d bin/ && \
     rm luau.zip && \
     chmod -R 777 /app/bin
 
-# 7. TRIK LARPCORRUPT: Copy binary Luau ke folder Deobfuscator/deobf/bin (TANPA .exe)
+# 8. TRIK LARPCORRUPT: Copy binary Luau ke folder Deobfuscator/deobf/bin (TANPA .exe)
 RUN mkdir -p /app/larp/Deobfuscator/deobf/bin && \
     cp /app/bin/luau /app/larp/Deobfuscator/deobf/bin/luau || true && \
     cp /app/bin/luau-ast /app/larp/Deobfuscator/deobf/bin/luau-ast || true && \
@@ -35,6 +39,6 @@ RUN mkdir -p /app/larp/Deobfuscator/deobf/bin && \
     cp /app/bin/luau-analyze /app/larp/Deobfuscator/deobf/bin/luau-analyze || true && \
     chmod -R 777 /app/larp/Deobfuscator/deobf/bin
 
-# 8. Jalanin server
+# 9. Jalanin server
 EXPOSE 3000
 CMD ["node", "server.js"]
