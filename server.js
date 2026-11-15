@@ -4,18 +4,18 @@ const cors = require('cors');
 const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const axios = require('axios'); // Kita butuh ini buat download URL
+const axios = require('axios');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json()); // Biar bisa nerima JSON dari frontend
+app.use(express.json());
 process.env.LUAU_AST_BIN = '/app/bin/luau-ast';
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        if (!fs.existsSync('uploads')) fs.mkdirSync('uploads');
+        if (!fs.existsSync('uploads')) fs.mkdirSync('uploads', { recursive: true });
         cb(null, 'uploads/');
     },
     filename: function (req, file, cb) {
@@ -24,9 +24,8 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-if (!fs.existsSync('output')) fs.mkdirSync('output');
+if (!fs.existsSync('output')) fs.mkdirSync('output', { recursive: true });
 
-// FUNGSI BANTUAN BUAT NGE-RUN ENGINE
 function runEngine(engine, mode, inputPath, outputPath, res, originalName) {
     let command = '';
 
@@ -63,7 +62,7 @@ function runEngine(engine, mode, inputPath, outputPath, res, originalName) {
     });
 }
 
-// 1. ENDPOINT UPLOAD FILE (YANG LAMA)
+// Endpoint Upload File
 app.post('/api/deobfuscate', upload.single('luaFile'), (req, res) => {
     if (!req.file) return res.status(400).send('File tidak ditemukan');
 
@@ -76,17 +75,18 @@ app.post('/api/deobfuscate', upload.single('luaFile'), (req, res) => {
     runEngine(engine, mode, inputPath, outputPath, res, originalName);
 });
 
-// 2. ENDPOINT URL (FITUR BARU)
+// Endpoint URL (Fitur Baru)
 app.post('/api/deobfuscate-url', async (req, res) => {
     const { url, engine, mode } = req.body;
     if (!url) return res.status(400).send('URL kosong');
 
     try {
-        // Download isi URL
         const response = await axios.get(url, { responseType: 'text' });
         const code = response.data;
         
-        // Simpen ke file sementara
+        // Pastiin folder uploads ada
+        if (!fs.existsSync('uploads')) fs.mkdirSync('uploads', { recursive: true });
+        
         const originalName = 'from_url.lua';
         const inputPath = path.join('uploads', `${Date.now()}_${originalName}`);
         fs.writeFileSync(inputPath, code);
