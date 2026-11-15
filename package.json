@@ -1,27 +1,26 @@
 {
+  "name": "luraphv15-node",
+  "version": "1.0.0",
+  "description": "Multi-engine Lua deobfuscator (Luraph, WeAreDevs, Larpcorrupt, MoonSec) with URL support",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
-    "multer": "^1.4.5-lts.1"
-  },
-  "name": "luraphv15-node",
-  "version": "1.0.0",
-  "description": "Luraph v15 deobfuscator - Node.js port",
-  "main": "deob.js",
-  "bin": {
-    "deob": "./deob.js"
-  },
-  "scripts": {
-    "start": "node server.js",
-    "test": "node deob.js samples/001_vm_like_dispatch.lua"
+    "multer": "^1.4.5-lts.1",
+    "axios": "^1.6.0"
   },
   "keywords": [
     "luraph",
     "deobfuscator",
     "roblox",
-    "luau"
+    "luau",
+    "wearedevs",
+    "moonsec"
   ],
-  "author": "",
+  "author": "kira1-strick",
   "license": "ISC",
   "type": "commonjs"
 }
