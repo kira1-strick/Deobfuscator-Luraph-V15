@@ -1,37 +1,41 @@
 FROM node:18-slim
 
-# 1. Install Python, Git, dan alat download
+# 1. Install Python, Git, alat download, dan .NET (buat IronBrew nanti)
 RUN apt-get update && apt-get install -y python3 python3-pip git curl unzip && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# 2. AMBIL PROMETHEUS (WEAREDEVS)
+# 2. PROMETHEUS (WEAREDEVS)
 RUN git clone https://github.com/kira1-strick/Prometheus-Deobfuscator.git prometheus
 RUN cd prometheus && npm install
 
-# 3. AMBIL LARPCORRUPT
+# 3. LARPCORRUPT
 RUN git clone https://github.com/larpcorrupt/luraph-v15-v14.x-deobfuscator.git larp
 RUN cd larp && pip3 install -r requirements.txt || true
 
-# 4. AMBIL MOONSEC (dari repo mokaEZF)
+# 4. MOONSEC
 RUN git clone https://github.com/mokaEZF/lua-deobfuscator-bot2.git moonsec
 RUN cd moonsec && npm install --legacy-peer-deps
 
-# 5. Copy package.json web utama dan install dependensi Node.js (termasuk axios)
+# 5. MEHCAKE V15 (Placeholder - kalo reponya ada isinya)
+RUN git clone https://github.com/mehCake/luraph-deobfuscator-py.git meh_v15 || true
+
+# 6. BINX V14 (Placeholder)
+RUN git clone https://github.com/binxgtl/luau-vmp-deobf.git binx_v14 || true
+
+# 7. COPY WEB UTAMA
 COPY package*.json ./
 RUN npm install
-
-# 6. Copy semua file web utama lo
 COPY . .
 
-# 7. SETUP BINARY LUAU (BUAT CAOMOD)
+# 8. SETUP BINARY LUAU
 RUN rm -rf bin/ && mkdir -p bin && \
     curl -L -o luau.zip https://github.com/luau-lang/luau/releases/latest/download/luau-ubuntu.zip && \
     unzip luau.zip -d bin/ && \
     rm luau.zip && \
     chmod -R 777 /app/bin
 
-# 8. TRIK LARPCORRUPT: Copy binary Luau ke folder Deobfuscator/deobf/bin (TANPA .exe)
+# 9. TRIK LARPCORRUPT
 RUN mkdir -p /app/larp/Deobfuscator/deobf/bin && \
     cp /app/bin/luau /app/larp/Deobfuscator/deobf/bin/luau || true && \
     cp /app/bin/luau-ast /app/larp/Deobfuscator/deobf/bin/luau-ast || true && \
@@ -39,6 +43,5 @@ RUN mkdir -p /app/larp/Deobfuscator/deobf/bin && \
     cp /app/bin/luau-analyze /app/larp/Deobfuscator/deobf/bin/luau-analyze || true && \
     chmod -R 777 /app/larp/Deobfuscator/deobf/bin
 
-# 9. Jalanin server
 EXPOSE 3000
 CMD ["node", "server.js"]
