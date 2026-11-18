@@ -26,6 +26,7 @@ const upload = multer({ storage: storage });
 
 if (!fs.existsSync('output')) fs.mkdirSync('output', { recursive: true });
 
+// FUNGSI BANTUAN BUAT NGE-RUN ENGINE
 function runEngine(engine, mode, inputPath, outputPath, res, originalName) {
     let command = '';
 
@@ -36,8 +37,11 @@ function runEngine(engine, mode, inputPath, outputPath, res, originalName) {
     } else if (engine === 'larp') {
         command = `cd larp/Deobfuscator/deobf && python3 cli.py "../../../${inputPath}" -o "../../../${outputPath}" --trace-fallback`;
     } else if (engine === 'moonsec') {
-        command = `cd moonsec && node index.js "../${inputPath}" -o "../${outputPath}"`;
+        // Panggil deobfuscator.js langsung, BUKAN index.js (karena index.js itu bot Discord)
+        // Kita asumsikan deobfuscator.js bisa nerima argumen input dan output
+        command = `cd moonsec && node deobfuscator.js "../${inputPath}" -o "../${outputPath}"`;
     } else {
+        // CAOMOD (LURAPH)
         if (mode === 'normal') {
             command = `node deob.js "${inputPath}" --no-hooks --timeout 1200 --budget 1200 -o "${outputPath}"`;
         } else {
@@ -62,7 +66,7 @@ function runEngine(engine, mode, inputPath, outputPath, res, originalName) {
     });
 }
 
-// Endpoint Upload File
+// 1. ENDPOINT UPLOAD FILE (YANG LAMA)
 app.post('/api/deobfuscate', upload.single('luaFile'), (req, res) => {
     if (!req.file) return res.status(400).send('File tidak ditemukan');
 
@@ -75,18 +79,20 @@ app.post('/api/deobfuscate', upload.single('luaFile'), (req, res) => {
     runEngine(engine, mode, inputPath, outputPath, res, originalName);
 });
 
-// Endpoint URL (Fitur Baru)
+// 2. ENDPOINT URL (FITUR BARU)
 app.post('/api/deobfuscate-url', async (req, res) => {
     const { url, engine, mode } = req.body;
     if (!url) return res.status(400).send('URL kosong');
 
     try {
+        // Download isi URL
         const response = await axios.get(url, { responseType: 'text' });
         const code = response.data;
         
         // Pastiin folder uploads ada
         if (!fs.existsSync('uploads')) fs.mkdirSync('uploads', { recursive: true });
         
+        // Simpen ke file sementara
         const originalName = 'from_url.lua';
         const inputPath = path.join('uploads', `${Date.now()}_${originalName}`);
         fs.writeFileSync(inputPath, code);
